@@ -1,14 +1,5 @@
-Class Functor T := {
-  fmap : forall {A B}, (A -> B) -> T A -> T B
-}.
-
 Instance MFunctor : Functor M := {
   fmap A B f x := x' <- x; ret (f x')
-}.
-
-Class Applicative T := {
-  pure : forall {A}, A -> T A;
-  app  : forall {A B}, T (A -> B) -> T A -> T B
 }.
 
 Instance MApplicative : Applicative M := {
@@ -40,3 +31,4 @@ Fixpoint mLiftList {A} (l : list (M A)) : M (list A) :=
 
 Definition liftMP {A} (x : list (M A * M A)) : M (list (A * A)) :=
   mLiftList (map mLiftPair x).      
+

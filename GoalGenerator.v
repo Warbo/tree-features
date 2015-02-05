@@ -4,6 +4,7 @@ Require Import List.
 Require Import Bool.
 Require Import EqNat.
 Import ListNotations.
+Require Import Helpers.
 
 (* Define binary trees with leaves of some type *)
 
@@ -14,6 +15,10 @@ Inductive Tree (t : Type) :=
 Definition leaf {t} x   := Leaf t x.
 Definition node {t} x y := Node t x y.
 
+Definition ll := leaf ().
+
+Definition nn : Tree () -> Tree () -> Tree () := node.
+                      
 Example leafTen : leaf 10 = Leaf nat 10.
   auto.
 Qed.
@@ -47,17 +52,47 @@ Fixpoint treesOf n :=
              in  filter (compose (beq_nat n) leaves) (pairOff smaller smaller)
   end.
 
+Example treesOfZero : treesOf 0 = [].
+  auto.
+Qed.
+
+Example treesOfOne : treesOf 1 = [leaf ()].
+  auto.
+Qed.
+
+Example treesOfTwo : treesOf 2 = [node (leaf ()) (leaf ())].
+  compute. auto.
+Qed.
+
+Example treesOfThree : treesOf 3 = [nn ll (nn ll ll); nn (nn ll ll) ll].
+  compute.
+
 Fixpoint upTo n := match n with
                      | 0   => nil
                      | S m => cons 0 (map S (upTo m))
                    end.
 
-Definition treesUpTo n := flat_map treesOf (upTo n).
-
-(* We want to enumerate trees, but we begin by enumerating nats *)
-
-
 Example upToFive : upTo 5 = [0; 1; 2; 3; 4].
+  auto.
+Qed.
+
+Definition treesUpTo n := flat_map treesOf (upTo (S n)).
+
+Goal [] = treesUpTo 3. compute.
+
+Example treesUpToFour : treesUpTo 4 = [leaf (); node (leaf ()) (leaf ());
+                                       node (leaf ()) (node (leaf ()) (leaf ()));
+                                       node (node (leaf ()) (leaf ())) (leaf ())].
+  compute. auto.
+Qed.
+
+(* Now we enumerate lists, with elements from a finite set *)
+
+Fixpoint prependAll {A} (elems : list A) xs := (map cons elems) <*> xs.
+
+Example prependNats : prependAll [1;2;3] [[10;20]; []; [30]] = [[1;10;20]; [1]; [1;30];
+                                                                [2;10;20]; [2]; [2;30];
+                                                                [3;10;20]; [3]; [3;30]].
   auto.
 Qed.
 
@@ -87,18 +122,6 @@ Definition sumPairs n := filter (compose (beq_nat n) (prod_curry plus))
 
 Example sumPairs4 : sumPairs 4 = [(1,3); (2,2); (3,1)].
   compute. auto.
-Qed.
-
-Fixpoint list_app {A B} (fs : list (A -> B)) (xs : list A) :=
-  match fs with
-    | []      => []
-    | g :: gs => map g xs ++ list_app gs xs
-  end.
-
-Notation "f <*> x" := (list_app f x) (at level 60).
-
-Example sumElems : [plus 2; plus 3] <*> [7; 8; 9] = [9; 10; 11; 10; 11; 12].
-  auto.
 Qed.
 
 Definition pair_map {A B} (f : A -> B) p := match p with
