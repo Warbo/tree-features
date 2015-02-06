@@ -7,5 +7,9 @@ stdenv.mkDerivation {
     coq_mtac
     pkgs.emacs
     pkgs.emacs24Packages.proofgeneral
+    pkgs.haskellPackages.ghc
+    pkgs.haskellPackages.xml
+    pkgs.haskellPackages.QuickCheck
+    pkgs.haskellPackages.MissingH
   ];
 }

@@ -10,6 +10,10 @@ Class Applicative T := {
   app  : forall {A B}, T (A -> B) -> T A -> T B
 }.
 
+Class DecEq A := {
+  eq : forall (x y : A), {x = y} + {x <> y}
+}.
+
 Fixpoint list_app {A B} (fs : list (A -> B)) (xs : list A) :=
   match fs with
     | []      => []

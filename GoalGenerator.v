@@ -1,33 +1,207 @@
 Require Import mtac.
 Require Import Program.
+Require Import Omega.
 Require Import List.
 Require Import Bool.
 Require Import EqNat.
 Import ListNotations.
 Require Import Helpers.
 
-(* Define binary trees with leaves of some type *)
+(* Define binary trees *)
 
-Inductive Tree (t : Type) :=
-| Leaf : t -> Tree t
-| Node : Tree t -> Tree t -> Tree t.
+Inductive Tree :=
+| Leaf : Tree
+| Node : Tree -> Tree -> Tree.
 
-Definition leaf {t} x   := Leaf t x.
-Definition node {t} x y := Node t x y.
+Theorem treeEq (x y : Tree) : {x = y} + {x <> y}.
+  decide equality.
+Qed.
 
-Definition ll := leaf ().
+Instance TreeEq : DecEq Tree := {
+  eq := treeEq
+}.
 
-Definition nn : Tree () -> Tree () -> Tree () := node.
-                      
-Example leafTen : leaf 10 = Leaf nat 10.
+Definition combineAll ls rs := (map Node ls) <*> rs.
+
+Fixpoint allTrees' n :=
+  match n with
+    | 0 => [Leaf]
+    | S n => let smaller := allTrees' n
+             in smaller ++ combineAll smaller smaller
+  end.
+
+Fixpoint InList {A} (x : A) xs : Prop :=
+  match xs with
+    | [] => False
+    | y::ys => x = y \/ InList x ys
+  end.
+
+Theorem findInList (t : Tree) ts : {InList t ts} + {~ InList t ts}.
+  induction ts; (simpl; auto). {
+    assert ({t = a} + {t <> a}). {
+      apply eq.
+    }
+    destruct H; (simpl; auto). {
+      destruct IHts; (simpl; auto).
+      intuition.
+    }
+  }
+Defined.
+
+Fixpoint index {A} n (xs : list A) : option A :=
+  match (n, xs) with
+    | (0,   y::ys) => Some y
+    | (S m, y::ys) => index m ys
+    | _            => None
+  end.
+
+Theorem indexFirst {A} (x : A) xs : index 0 (x::xs) = Some x.
   auto.
 Qed.
 
-Example nestedNodes : node (leaf 1) (node (leaf 2) (leaf 3)) = Node nat (leaf 1)
-                                                                        (node (leaf 2)
-                                                                              (leaf 3)).
-  auto.
+Theorem findableInList (x : Tree) xs
+: InList x xs -> {n | index n xs = Some x}.
+  intros. induction xs. {
+    simpl in H. tauto.
+  } {
+    simpl in H. assert (e := eq x a).
+    destruct e. {
+      refine (exist _ 0 _). simpl. rewrite e. auto.
+    } {
+      assert (InList x xs). {
+        decompose sum H; tauto.
+      }
+      assert (q := IHxs H0).
+      destruct q.
+      refine (exist _ (S x0) _).
+      simpl. auto.
+    }    
+  }
 Qed.
+
+Goal 4 = 3 + 1.
+  assert (n := 5).
+  set (q := [true; false]).
+  match goal with
+    | [ H : ?T |- ?G ] => external "./store.sh" "" G T
+  end.
+
+Fixpoint indexInList t ts (p : InList t ts) : {n |  :=
+  match (p, ts) with
+    | (left  _, _)      => 0
+    | (right r, _::ts') => S (indexInList t ts')
+  end.
+
+Definition gotAllTrees' t :=
+  mfix f n : InList t (allTrees' n) :=
+  match findInList t (allTrees' n) with
+    | 
+
+Theorem gotAllTrees : forall t,
+                        {n : nat | InList t (allTrees' n)}.
+  intro. induction t. {
+    refine (exist _ 0 _). simpl. tauto.
+  } {
+    
+  }
+
+Definition allTrees := 
+
+(* We can also represent binary trees as "paths to their leaves" *)
+
+Definition path := list bool.
+
+Definition PathTree := list path.
+
+Fixpoint totalLength (t : PathTree) :=
+  match t with
+    | []    => 1
+    | x::xs => 1 + length x + totalLength xs
+  end.
+
+Theorem tlAddElem : forall tp p, totalLength tp < totalLength (p::tp).
+  intros. simpl. omega.
+Qed.
+
+Theorem tlAddComponent : forall tp p x, totalLength (p::tp) < totalLength ((x::p)::tp).
+  intros. simpl. omega.
+Qed.
+  
+(* We can convert from a PathTree to a Tree *)
+
+Fixpoint getLefts (tp : PathTree) : PathTree :=
+  match tp with
+    | (true::p)::ps => p :: getLefts ps
+    |        _ ::ps =>      getLefts ps
+    | _             => []
+  end.
+
+Fixpoint getRights (tp : PathTree) : PathTree
+  := match tp with
+       | (false::p)::ps => p :: getRights ps
+       |          _::ps =>      getRights ps
+       | _              => []
+     end.
+
+Theorem glLT : forall p tp, totalLength (getLefts (p::tp)) < totalLength (p::tp).
+  intros. induction p. {
+    simpl. induction tp. {
+      simpl. omega.
+    } {
+      induction a. {
+        simpl. omega.
+      } {
+        simpl. destruct a. {
+          simpl. omega.
+        } {
+          omega.
+        }
+      }
+    }
+  } {
+    destruct a. {
+      simpl. apply IHp. simpl in IHp. omega.
+    }
+  }
+
+Program Fixpoint pathsToTree tp {measure (totalLength tp)}:=
+  match tp with
+    | [] => Leaf
+    | xs => Node (pathsToTree (getLefts xs)) (pathsToTree (getRights xs))
+  end.
+
+Next Obligation.
+  induction tp. {
+    assert (f := H (eq_refl [])). intuition.
+  } {
+    
+                }simpl. omega.
+
+unfold getLefts. dependent destruction tp. {
+    
+  induction tp. {
+    assert (f := H (eq_refl [])).
+    intuition.
+  } {
+    induction a. {
+      simpl. dependent destruction tp. {
+        simpl. omega.
+      } {
+        set (tp' := p::tp).
+        apply (lt_trans (totalLength (getLefts tp'))
+                     (S (totalLength (getLefts tp')))). {
+          omega.
+        } {
+Search lt.
+          apply lt_n_S. apply IHtp. intros.
+        }
+}
+apply lt_n_S. apply IHtp. simpl.
+                                       }
+                                       apply IHtp.
+      intuition. simpl. apply H0.
+                  }
+                }
 
 Fixpoint pairOff {A} (ls rs : list (Tree A)) :=
   match ls with
