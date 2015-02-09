@@ -1,2 +1,6 @@
 *.glob
 *.vo
+*.hi
+*.o
+*.#*
+processor
