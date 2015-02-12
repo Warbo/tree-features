@@ -41,7 +41,7 @@ features (x:y:xs) = cconv (cconv x y) (features xs)  -- Left-associative
 
 -- FIXME: Temporary, need to limit this to N bits
 feature :: Integer -> String -> Integer
-feature n = setBit . (+ 1) . (`mod` n) . md5i . Str
+feature n = setBit . (`mod` n) . md5i . Str
 
 setBit :: Integer -> Integer
 setBit = (2 ^)
