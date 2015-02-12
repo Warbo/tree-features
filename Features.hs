@@ -32,14 +32,12 @@ extractFeatures (goal, context) = features (map extractFeatures' (goal : context
 extractFeatures' :: Tree -> Integer
 extractFeatures' (T (x, xs)) = features (x : map extractFeatures' xs)
 
--- FIXME: Temporary, need a nice dimension-reducer
 features :: [Integer] -> Integer
 features []  = 0
 features [x] = x
 features (x:y:[]) = cconv x y
 features (x:y:xs) = cconv (cconv x y) (features xs)  -- Left-associative
 
--- FIXME: Temporary, need to limit this to N bits
 feature :: Integer -> String -> Integer
 feature n = setBit . (`mod` n) . md5i . Str
 

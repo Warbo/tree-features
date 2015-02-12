@@ -15,4 +15,4 @@ defaultBits = 31
 
 main = do bits  <- getBits
           input <- getContents
-          print (parseRequest bits (parse input))
+          print . extractFeatures . parseRequest bits . parse $ input
