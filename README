@@ -1,0 +1,15 @@
+Generic feature extraction from XML documents.
+
+For machine learning problems, we often need our inputs to be the same, fixed size.
+When we have a recursive structure, like a tree, we can fold over the structure to
+obtain a single value.
+
+This is a very basic implementation of this idea: we take arbitrary XML documents,
+which are tree structured, and assign each element a value based on the md5 of its
+name and attributes concatenated together. We fold sub-trees together using bitwise
+circular convolution, to obtain a value for the whole tree.
+
+Circular convolution is a linear operation, so it can't preserve as much
+information as, for example, auto-encoding, but it is reasonably fast, requires no
+learning and is largely non-commutative/associative, so sub-trees should be
+distinguishable to a certain extent.
