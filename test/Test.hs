@@ -1,2 +1,0 @@
-import XmlTest
-import ConvolutionTest
