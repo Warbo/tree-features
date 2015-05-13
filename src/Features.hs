@@ -9,8 +9,9 @@ import Text.XML.Light.Input
 import Text.XML.Light.Types
 import XmlHelper
 
-newtype Tree = T (Integer, [Tree]) -- Feature vector and sub-trees
-             deriving (Show, Eq)
+newtype TreeOf a = T (a, [TreeOf a]) deriving (Show, Eq)
+
+type Tree = TreeOf Integer
 
 type Request = (Tree, [Tree])  -- Goal and context
 
