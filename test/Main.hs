@@ -3,6 +3,7 @@ module Main where
 import Test.QuickCheck
 import XmlTest
 import ConvolutionTest
+import qualified SexprTests
 import qualified FeatureTest
 
 main = do putStrLn "convSameSize"
@@ -12,3 +13,4 @@ main = do putStrLn "convSameSize"
           putStrLn "parseTrees"
           quickCheck parseTrees
           FeatureTest.tests
+          SexprTests.tests

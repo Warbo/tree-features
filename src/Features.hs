@@ -11,6 +11,9 @@ import XmlHelper
 
 newtype TreeOf a = T (a, [TreeOf a]) deriving (Show, Eq)
 
+instance Functor TreeOf where
+  fmap f (T (x, ts)) = T (f x, map (fmap f) ts)
+
 type Tree = TreeOf Integer
 
 type Request = (Tree, [Tree])  -- Goal and context
