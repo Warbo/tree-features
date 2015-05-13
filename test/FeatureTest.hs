@@ -75,8 +75,6 @@ enoughUniqueNums size' count' = forAll (uniqueNumsTo size count) enough
 sizedTreeSized size' = forAll (sizedTree size) sized
   where size             = 1 + (abs size' `mod` 10)
         sized  t         = leaves t == size
-        leaves (Leaf _)  = 1
-        leaves (Node ts) = sum (map leaves ts)
 
 tests = do putStrLn "numsSumToSumTo"
            quickCheck numsSumToSumTo

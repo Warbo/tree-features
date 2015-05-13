@@ -59,11 +59,11 @@ exampleAsts = unsafePerformIO $ do files <- getDirectoryContents dir
   where dir = "test/data/good/"
         isAst f = reverse (take 4 (reverse f)) == ".ast"
 
-canParseHS2ASTOutput :: Int -> Bool
-canParseHS2ASTOutput n = let ast = exampleAsts !! (n `mod` length exampleAsts)
-                         in  case parse parseExpr "TEST" ast of
-                              Left err -> error (show err)
-                              Right t  -> True
+canParseHS2ASTOutput :: Bool
+canParseHS2ASTOutput = all parser exampleAsts
+  where parser ast = case parse parseExpr "TEST" ast of
+                      Left err -> error (show err)
+                      Right t  -> True
 
 tests = do putStrLn  "canParseChar"
            quickCheck canParseChar

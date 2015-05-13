@@ -50,3 +50,6 @@ feature n = setBit . (`mod` n) . md5i . Str
 
 setBit :: Integer -> Integer
 setBit = (2 ^)
+
+leaves (Leaf _)  = 1
+leaves (Node ts) = sum (map leaves ts)

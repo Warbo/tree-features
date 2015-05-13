@@ -21,6 +21,6 @@ attrFilter :: (String, String) -> [String]
 attrFilter ("id", _) = []
 attrFilter (x,    y) = [x ++ y]
 
-parse = fromJust . parseXMLDoc
+parseXml = fromJust . parseXMLDoc
 
-getXml = fmap parse getContents
+getXml = fmap parseXml getContents

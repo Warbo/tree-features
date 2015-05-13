@@ -36,3 +36,8 @@ treeToSexpr :: Show a => TreeOf a -> String
 treeToSexpr (Leaf x)  = show x
 treeToSexpr (Node ts) = let elems = map treeToSexpr ts
                         in  "(" ++ unwords elems ++ ")"
+
+parseSexpr :: String -> TreeOf String
+parseSexpr s = case parse parseExpr "parseExpr" s of
+                Left  err -> error (show err)
+                Right t   -> t

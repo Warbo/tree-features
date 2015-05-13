@@ -5,6 +5,7 @@ import XmlTest
 import ConvolutionTest
 import qualified SexprTests
 import qualified FeatureTest
+import qualified ProgramTests
 
 main = do putStrLn "convSameSize"
           quickCheck convSameSize
@@ -14,3 +15,4 @@ main = do putStrLn "convSameSize"
           quickCheck parseTrees
           FeatureTest.tests
           SexprTests.tests
+          ProgramTests.tests
