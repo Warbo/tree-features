@@ -21,11 +21,11 @@ parseList = between (char '(')
 
 parseLeaf :: Parser (TreeOf String)
 parseLeaf = do s <- parseString
-               return (T (s, []))
+               return (Leaf s)
 
 parseNode :: Parser (TreeOf String)
 parseNode = do ts <- parseList
-               return (T ("", ts))
+               return (Node ts)
 
 parseExpr :: Parser (TreeOf String)
 parseExpr = parseLeaf <|> parseNode
@@ -33,6 +33,6 @@ parseExpr = parseLeaf <|> parseNode
 quote s = "\"" ++ s ++ "\""
 
 treeToSexpr :: Show a => TreeOf a -> String
-treeToSexpr (T (x, [])) = show x
-treeToSexpr (T (x, ts)) = let elems = show x : map treeToSexpr ts
-                          in  "(" ++ unwords elems ++ ")"
+treeToSexpr (Leaf x)  = show x
+treeToSexpr (Node ts) = let elems = map treeToSexpr ts
+                        in  "(" ++ unwords elems ++ ")"

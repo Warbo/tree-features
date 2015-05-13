@@ -9,10 +9,12 @@ import Text.XML.Light.Input
 import Text.XML.Light.Types
 import XmlHelper
 
-newtype TreeOf a = T (a, [TreeOf a]) deriving (Show, Eq)
+data TreeOf a = Leaf a
+              | Node [TreeOf a] deriving (Show, Eq)
 
 instance Functor TreeOf where
-  fmap f (T (x, ts)) = T (f x, map (fmap f) ts)
+  fmap f (Leaf x)  = Leaf (f x)
+  fmap f (Node ts) = Node (map (fmap f) ts)
 
 type Tree = TreeOf Integer
 
@@ -23,18 +25,19 @@ parseRequest bits e = let (goal:context) = elContent e
                        in (parseTerm bits goal, map (parseTerm bits) context)
 
 parseTerm :: Integer -> Content -> Tree
-parseTerm bits (Text t) = T (feature bits (cdData t), [])
+parseTerm bits (Text t) = Leaf (feature bits (cdData t))
 parseTerm bits (Elem e) = let subtrees = map (parseTerm bits) (elContent e)
                               name     = qName (elName e)
                               attrs    = getAttrs e
                               fVec     = features . map (feature bits) $ name : attrs
-                          in T (fVec, subtrees)
+                          in Node (Leaf fVec : subtrees)
 
 extractFeatures :: Request -> Integer
 extractFeatures (goal, context) = features (map extractFeatures' (goal : context))
 
 extractFeatures' :: Tree -> Integer
-extractFeatures' (T (x, xs)) = features (x : map extractFeatures' xs)
+extractFeatures' (Leaf x)  = features [x]
+extractFeatures' (Node xs) = features (map extractFeatures' xs)
 
 features :: [Integer] -> Integer
 features []  = 0

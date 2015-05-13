@@ -10,11 +10,11 @@ sizedTreeOf :: Arbitrary a => Int -> Gen (TreeOf a)
 sizedTreeOf n' = let n = abs n' `mod` 1000
                  in do head  <- arbitrary
                        count <- choose (1, n)
-                       nums  <- if n > 1
-                                   then numsSumTo n count
-                                   else return []
+                       nums  <- numsSumTo n count
                        tail  <- mapM sizedTreeOf nums
-                       return (T (head, tail))
+                       return $ if n > 1
+                                   then Node tail
+                                   else Leaf head
 
 sizedTree :: Int -> Gen Tree
 sizedTree = fmap posTree . sizedTreeOf
@@ -27,7 +27,7 @@ sizedRequest n = do first  <- sizedTree n
 -- Helpers for implementing sized Trees
 
 posTree :: Num n => TreeOf n -> TreeOf n
-posTree (T (x, ts)) = T (abs x, map posTree ts)
+posTree = fmap abs
 
 
 uniqueNumsTo size count = do nums <- numsTo size
@@ -73,10 +73,10 @@ enoughUniqueNums size' count' = forAll (uniqueNumsTo size count) enough
         count  = abs count' `mod` 1000
 
 sizedTreeSized size' = forAll (sizedTree size) sized
-  where size               = 1 + (abs size' `mod` 10)
-        sized  t           = leaves t == size
-        leaves (T (_, [])) = 1
-        leaves (T (_, ts)) = sum (map leaves ts)
+  where size             = 1 + (abs size' `mod` 10)
+        sized  t         = leaves t == size
+        leaves (Leaf _)  = 1
+        leaves (Node ts) = sum (map leaves ts)
 
 tests = do putStrLn "numsSumToSumTo"
            quickCheck numsSumToSumTo

@@ -8,9 +8,10 @@ import FeatureTest
 import System.IO.Unsafe
 import System.Directory
 
-sanitise = filter (/= '"')
-
-leaf s = T (s, [])
+-- | Strip potentially unparsable characters from a string
+sanitise :: String -> String
+sanitise s = let keep c = c /= '"' && c /= '\\'
+             in  filter keep (show s)
 
 canParseChar c = sanitise [c] == [c] ==>
                  case parse stringChar "TEST" [c] of
@@ -25,7 +26,7 @@ canParseString s' = let s = sanitise s'
 canParseLeaf s' = let s = sanitise s'
                   in  case parse parseLeaf "TEST" (quote s) of
                        Left err -> error (show err)
-                       Right t  -> t == T (s, [])
+                       Right t  -> t == Leaf s
 
 canParseFlatNode :: [String] -> Bool
 canParseFlatNode ss' = let ss = map sanitise ss'
@@ -33,7 +34,7 @@ canParseFlatNode ss' = let ss = map sanitise ss'
                                      "TEST"
                                      ("(" ++ unwords (map quote ss) ++ ")") of
                            Left err -> error (show err)
-                           Right t  -> t == T ("", map leaf ss)
+                           Right t  -> t == Node (map Leaf ss)
 
 -- NOTE: Parsed trees might not equal the incoming trees!
 canParseRenderedTrees :: Int -> Property
@@ -41,8 +42,16 @@ canParseRenderedTrees n = forAll (sizedTreeOf n :: Gen (TreeOf String))
                                  parses
   where parses t' = let t = fmap sanitise t'
                     in  case parse parseExpr "TEST" (treeToSexpr t) of
-                         Left err -> error (show err)
-                         Right _  -> True
+                         Left  err -> error (show err)
+                         Right _   -> True
+
+parsedTreesEqualRendered :: Int -> Property
+parsedTreesEqualRendered n = forAll (sizedTreeOf n :: Gen (TreeOf String))
+                                    parses
+  where parses t' = let t = fmap sanitise t'
+                    in  case parse parseExpr "TEST" (treeToSexpr t) of
+                         Left  err -> error (show err)
+                         Right t'' -> t'' == t
 
 exampleAsts = unsafePerformIO $ do files <- getDirectoryContents dir
                                    let asts = filter isAst files
@@ -54,7 +63,7 @@ canParseHS2ASTOutput :: Int -> Bool
 canParseHS2ASTOutput n = let ast = exampleAsts !! (n `mod` length exampleAsts)
                          in  case parse parseExpr "TEST" ast of
                               Left err -> error (show err)
-                              Right t  -> error ("GOT: " ++ show t)
+                              Right t  -> True
 
 tests = do putStrLn  "canParseChar"
            quickCheck canParseChar
@@ -68,3 +77,5 @@ tests = do putStrLn  "canParseChar"
            quickCheck canParseRenderedTrees
            putStrLn  "canParseHS2ASTOutput"
            quickCheck canParseHS2ASTOutput
+           putStrLn  "parsedTreesEqualRendered"
+           quickCheck parsedTreesEqualRendered
