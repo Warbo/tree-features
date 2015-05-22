@@ -7,7 +7,7 @@ import Text.ParserCombinators.Parsec
 -- thing in the world to do
 
 stringChar :: Parser Char
-stringChar = {-try (string "\\\"" >> return '"') <|> -} noneOf "\""
+stringChar = try (string "\\\"" >> return '"') <|> noneOf "\""
 
 parseString :: Parser String
 parseString = between (char '"')

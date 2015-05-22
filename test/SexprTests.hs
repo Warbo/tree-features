@@ -22,7 +22,7 @@ canParseChar c = sanitise [c] == [c] ==>
 
 canParseQuote = case parse stringChar "TEST" ['\\', '"'] of
                  Left err -> error (show err)
-                 Right x  -> x == 'z'
+                 Right x  -> x == '"'
 
 canParseString s' = let s = sanitise s'
                     in  case parse parseString "TEST" (quote s) of
