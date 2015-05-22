@@ -18,6 +18,10 @@ canParseChar c = sanitise [c] == [c] ==>
                   Left err -> error (show err)
                   Right x  -> x == c
 
+canParseQuote = case parse stringChar "TEST" ['\\', '"'] of
+                 Left err -> error (show err)
+                 Right x  -> x == 'z'
+
 canParseString s' = let s = sanitise s'
                     in  case parse parseString "TEST" (quote s) of
                         Left err -> error (show err)
@@ -67,6 +71,8 @@ canParseHS2ASTOutput = all parser exampleAsts
 
 tests = do putStrLn  "canParseChar"
            quickCheck canParseChar
+           putStrLn  "canParseQuote"
+           quickCheck canParseQuote
            putStrLn  "canParseString"
            quickCheck canParseString
            putStrLn  "canParseLeaf"
