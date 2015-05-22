@@ -1,5 +1,8 @@
-module XmlTest where
+module XmlTest (tests, testData) where
 
+import           Test.Tasty (testGroup)
+import Test.Tasty.QuickCheck (testProperty)
+import Test.Tasty.QuickCheck (testProperty)
 import Test.QuickCheck
 import Text.XML.Light.Input
 import Text.XML.Light.Types
@@ -52,3 +55,9 @@ parseTest = case parseXMLDoc testData of
                  Just _  -> True
 
 parseTrees xml = let x = parseRequest xml in True
+
+tests = testGroup "XML Tests"
+          [
+            testProperty "Can parse example"         parseTest
+          , testProperty "Can parse example to tree" parseTrees
+          ]

@@ -1,5 +1,7 @@
-module FeatureTest where
+module FeatureTest (tests, sizedTreeOf) where
 
+import           Test.Tasty (testGroup)
+import Test.Tasty.QuickCheck (testProperty)
 import Data.List
 import Features
 import Test.QuickCheck
@@ -76,13 +78,11 @@ sizedTreeSized size' = forAll (sizedTree size) sized
   where size             = 1 + (abs size' `mod` 10)
         sized  t         = leaves t == size
 
-tests = do putStrLn "numsSumToSumTo"
-           quickCheck numsSumToSumTo
-           putStrLn "enoughUniqueNums"
-           quickCheck enoughUniqueNums
-           putStrLn "sizedTreeSized"
-           quickCheck sizedTreeSized
-           putStrLn "extractFromTree"
-           quickCheck extractFromTree
-           putStrLn "extractFromRequest"
-           quickCheck extractFromRequest
+tests = testGroup "Feature tests"
+          [
+            testProperty "numsSumToSumTo" numsSumToSumTo
+          , testProperty "enoughUniqueNums" enoughUniqueNums
+          , testProperty "sizedTreeSized" sizedTreeSized
+          , testProperty "extractFromTree" extractFromTree
+          , testProperty "extractFromRequest" extractFromRequest
+          ]

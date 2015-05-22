@@ -1,10 +1,12 @@
-module SexprTests where
+module SexprTests (tests, sanitise, exampleAsts) where
 
+import           Test.Tasty (testGroup)
+import Test.Tasty.QuickCheck (testProperty)
 import Test.QuickCheck
 import Text.Parsec
 import SexprHelper
 import Features
-import FeatureTest
+import FeatureTest (sizedTreeOf)
 import System.IO.Unsafe
 import System.Directory
 
@@ -69,19 +71,14 @@ canParseHS2ASTOutput = all parser exampleAsts
                       Left err -> error (show err)
                       Right t  -> True
 
-tests = do putStrLn  "canParseChar"
-           quickCheck canParseChar
-           putStrLn  "canParseQuote"
-           quickCheck canParseQuote
-           putStrLn  "canParseString"
-           quickCheck canParseString
-           putStrLn  "canParseLeaf"
-           quickCheck canParseLeaf
-           putStrLn  "canParseFlatNode"
-           quickCheck canParseFlatNode
-           putStrLn  "canParseRenderedTrees"
-           quickCheck canParseRenderedTrees
-           putStrLn  "canParseHS2ASTOutput"
-           quickCheck canParseHS2ASTOutput
-           putStrLn  "parsedTreesEqualRendered"
-           quickCheck parsedTreesEqualRendered
+tests = testGroup "S-expression tests"
+          [
+            testProperty "canParseChar" canParseChar
+          , testProperty "canParseQuote" canParseQuote
+          , testProperty "canParseString" canParseString
+          , testProperty "canParseLeaf" canParseLeaf
+          , testProperty "canParseFlatNode" canParseFlatNode
+          , testProperty "canParseRenderedTrees" canParseRenderedTrees
+          , testProperty "canParseHS2ASTOutput" canParseHS2ASTOutput
+          , testProperty "parsedTreesEqualRendered" parsedTreesEqualRendered
+          ]

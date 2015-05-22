@@ -1,5 +1,7 @@
 module ProgramTests where
 
+import           Test.Tasty (testGroup)
+import Test.Tasty.QuickCheck (testProperty)
 import Program
 import Features
 import SexprHelper
@@ -27,11 +29,10 @@ templateGivesCsv b n = forAll (FeatureTest.sizedTreeOf n :: Gen (TreeOf String))
         isCsv ('0':',':bs) = isCsv bs
         isCsv ('1':',':bs) = isCsv bs
 
-tests = do putStrLn  "canParseXml"
-           quickCheck canParseXml
-           putStrLn  "canParseSexpr"
-           quickCheck canParseSexpr
-           putStrLn  "templateCanParseSexpr"
-           quickCheck templateCanParseSexpr
-           putStrLn  "templateGivesCsv"
-           quickCheck templateGivesCsv
+tests = testGroup "Program tests"
+          [
+            testProperty  "canParseXml" canParseXml
+          , testProperty  "canParseSexpr" canParseSexpr
+          , testProperty  "templateCanParseSexpr" templateCanParseSexpr
+          , testProperty  "templateGivesCsv" templateGivesCsv
+          ]

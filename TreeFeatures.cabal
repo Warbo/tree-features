@@ -38,3 +38,5 @@ test-suite test
                      , parsec
                      , QuickCheck
                      , directory
+                     , tasty >= 0.7
+                     , tasty-quickcheck
