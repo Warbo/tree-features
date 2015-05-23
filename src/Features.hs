@@ -16,9 +16,12 @@ instance Functor TreeOf where
   fmap f (Leaf x)  = Leaf (f x)
   fmap f (Node ts) = Node (map (fmap f) ts)
 
-type Tree = TreeOf Integer
+type Tree = TreeOf FeatureVector
 
-type Request = (Tree, [Tree])  -- Goal and context
+-- | Goal and context, from Coq XML output
+type Request = (Tree, [Tree])
+
+type FeatureVector = [Integer]
 
 parseRequest :: Integer -> Element -> Request
 parseRequest bits e = let (goal:context) = elContent e
@@ -32,24 +35,32 @@ parseTerm bits (Elem e) = let subtrees = map (parseTerm bits) (elContent e)
                               fVec     = features . map (feature bits) $ name : attrs
                           in Node (Leaf fVec : subtrees)
 
-extractFeatures :: Request -> Integer
+-- | Extract a FeatureVector from a Request
+extractFeatures :: Request -> FeatureVector
 extractFeatures (goal, context) = features (map extractFeatures' (goal : context))
 
-extractFeatures' :: Tree -> Integer
+-- | Extract a FeatureVector from a Tree
+extractFeatures' :: Tree -> FeatureVector
 extractFeatures' (Leaf x)  = features [x]
 extractFeatures' (Node xs) = features (map extractFeatures' xs)
 
-features :: [Integer] -> Integer
-features []  = 0
-features [x] = x
-features (x:y:[]) = cconv x y
-features (x:y:xs) = cconv (cconv x y) (features xs)  -- Left-associative
+-- | Combine FeatureVectors
+features :: [FeatureVector] -> FeatureVector
+features []       = []
+features (x:xs)   = zipSum x (features xs)
 
-feature :: Integer -> String -> Integer
-feature n = setBit . (`mod` n) . md5i . Str
+zipSum    []     ys  = ys
+zipSum    xs     []  = xs
+zipSum (x:xs) (y:ys) = (x+y) : zipSum xs ys
 
-setBit :: Integer -> Integer
-setBit = (2 ^)
+-- | Extract a feature from a string, mod n
+feature :: Integer -> String -> FeatureVector
+feature n = setFeature . (`mod` n) . md5i . Str
+
+-- | Create a fresh FeatureVector with the nth feature set to 1 and the rest 0
+setFeature :: Integer -> FeatureVector
+setFeature 0 = [1]
+setFeature n = 0 : setFeature (n-1)
 
 leaves (Leaf _)  = 1
 leaves (Node ts) = sum (map leaves ts)

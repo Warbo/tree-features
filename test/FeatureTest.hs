@@ -28,9 +28,8 @@ sizedRequest n = do first  <- sizedTree n
 
 -- Helpers for implementing sized Trees
 
-posTree :: Num n => TreeOf n -> TreeOf n
-posTree = fmap abs
-
+posTree :: Num n => TreeOf [n] -> TreeOf [n]
+posTree = fmap (map abs)
 
 uniqueNumsTo size count = do nums <- numsTo size
                              return (takeUnique count nums [])
@@ -54,11 +53,11 @@ takeUnique n xs acc = let xs' = dropWhile (`elem` acc) xs
 -- Properties for Trees
 
 extractFromTree n = forAll (sizedTree (1 + (abs n))) positive
-  where positive t = extractFeatures' t >= 0
+  where positive t = all (>= 0) (extractFeatures' t)
 
 extractFromRequest n' = forAll (sizedRequest n) positive
   where n          = abs n' `mod` 1000
-        positive r = extractFeatures r >= 0
+        positive r = all (>= 0) (extractFeatures r)
 
 -- Properties for sized helpers
 

@@ -1,5 +1,6 @@
 module Program where
 
+import Data.List
 import System.Environment
 import Text.XML.Light.Input
 import Text.XML.Light.Types
@@ -37,18 +38,20 @@ mainTemplate' bits input mode = extractFeatures' . fmap (feature (fromIntegral b
                                                  . parse mode
                                                  $ input
 
-mainTemplate bits input mode = bitsOf bits (mainTemplate' bits input mode)
+mainTemplate bits input mode = numsOf bits (mainTemplate' bits input mode)
 
-bitsOf bits n = let num    = showIntAtBase 2 intToDigit n ""
-                    padded = padTo bits num
-                in  addCommas padded
+numsOf nums fv = let padded = padTo (fromIntegral nums) fv
+                 in  addCommas (map show padded)
 
-addCommas []  = []
-addCommas [x] = [x]
-addCommas (x:y:zs) = x:',':addCommas (y:zs)
+addCommas :: [String] -> String
+addCommas s = intercalate "," s
+--addCommas []       = []
+--addCommas [x]      = [x]
+--addCommas (x:y:zs) = x:',':addCommas (y:zs)
 
-padTo n s | length s >= n = reverse (take n (reverse s))
-padTo n s                 = padTo n ('0':s)
+padTo :: Int -> FeatureVector -> FeatureVector
+padTo n fv | length fv >= n = reverse (take n (reverse fv))
+padTo n fv                  = padTo n (fv ++ [0])
 
 mainWithBits = do bits  <- getBits
                   input <- getContents

@@ -5,6 +5,7 @@ import Test.Tasty.QuickCheck (testProperty)
 import Program
 import Features
 import SexprHelper
+import Data.String.Utils
 import qualified XmlTest
 import qualified SexprTests
 import qualified FeatureTest
@@ -19,16 +20,16 @@ templateCanParseSexpr :: Int -> Int -> Property
 templateCanParseSexpr b n = forAll (FeatureTest.sizedTreeOf n :: Gen (TreeOf String)) parses
   where bits = abs b `mod` 31 + 1
         parses t = inRange (mainTemplate' bits (treeToSexpr (fmap SexprTests.sanitise t)) Sexpr)
-        inRange x = x >= (0 :: Integer) && x < (2 ^ bits)
+        inRange x = length x <= fromIntegral bits
 
 templateGivesCsv :: Int -> Int -> Property
 templateGivesCsv b n = forAll (FeatureTest.sizedTreeOf n :: Gen (TreeOf String)) parses
   where bits = abs b `mod` 31 + 1
         parses t = isCsv (mainTemplate bits (treeToSexpr (fmap SexprTests.sanitise t)) Sexpr)
-        isCsv [] = True
-        isCsv [c] = True
-        isCsv ('0':',':bs) = isCsv bs
-        isCsv ('1':',':bs) = isCsv bs
+        isCsv s = let ns = split "," s
+                      isNum n = show (read n :: Int) == n
+                      pos   n = (read n :: Int) >= 0
+                  in  all isNum ns && all pos ns
 
 tests = testGroup "Program tests"
           [
