@@ -15,49 +15,32 @@ sanitise :: String -> String
 sanitise s = let keep c = c /= '"' && c /= '\\'
              in  filter keep (show s)
 
-canParseChar c = sanitise [c] == [c] ==>
-                 case parse stringChar "TEST" [c] of
-                  Left err -> error (show err)
-                  Right x  -> x == c
-
-canParseQuote = case parse stringChar "TEST" ['\\', '"'] of
-                 Left err -> error (show err)
-                 Right x  -> x == '"'
-
-canParseString s' = let s = sanitise s'
-                    in  case parse parseString "TEST" (quote s) of
-                        Left err -> error (show err)
-                        Right x  -> x == s
+quote x = concat ["\"", x, "\""]
 
 canParseLeaf s' = let s = sanitise s'
-                  in  case parse parseLeaf "TEST" (quote s) of
-                       Left err -> error (show err)
-                       Right t  -> t == Leaf s
+                      t = parseSexpr (quote s)
+                   in t == Leaf s
 
 canParseFlatNode :: [String] -> Bool
 canParseFlatNode ss' = let ss = map sanitise ss'
-                       in case parse parseNode
-                                     "TEST"
-                                     ("(" ++ unwords (map quote ss) ++ ")") of
-                           Left err -> error (show err)
-                           Right t  -> t == Node (map Leaf ss)
+                           t  = parseSexpr (concat ["(",
+                                                    unwords (map quote ss),
+                                                    ")"])
+                        in t == Node (map Leaf ss)
 
 -- NOTE: Parsed trees might not equal the incoming trees!
 canParseRenderedTrees :: Int -> Property
 canParseRenderedTrees n = forAll (sizedTreeOf n :: Gen (TreeOf String))
                                  parses
-  where parses t' = let t = fmap sanitise t'
-                    in  case parse parseExpr "TEST" (treeToSexpr t) of
-                         Left  err -> error (show err)
-                         Right _   -> True
+  where parses t' = let t  = fmap sanitise t'
+                     in forceTree (parseSexpr (treeToSexpr t))
 
 parsedTreesEqualRendered :: Int -> Property
 parsedTreesEqualRendered n = forAll (sizedTreeOf n :: Gen (TreeOf String))
                                     parses
-  where parses t' = let t = fmap sanitise t'
-                    in  case parse parseExpr "TEST" (treeToSexpr t) of
-                         Left  err -> error (show err)
-                         Right t'' -> t'' == t
+  where parses t' = let t  = fmap sanitise t'
+                        t2 = parseSexpr (treeToSexpr t)
+                     in t2 == t
 
 exampleAsts = unsafePerformIO $ do files <- getDirectoryContents dir
                                    let asts = filter isAst files
@@ -65,18 +48,17 @@ exampleAsts = unsafePerformIO $ do files <- getDirectoryContents dir
   where dir = "test/data/good/"
         isAst f = reverse (take 4 (reverse f)) == ".ast"
 
+forceTree :: TreeOf a -> Bool
+forceTree (Leaf _)  = True
+forceTree (Node xs) = all forceTree xs
+
 canParseHS2ASTOutput :: Bool
 canParseHS2ASTOutput = all parser exampleAsts
-  where parser ast = case parse parseExpr "TEST" ast of
-                      Left err -> error (show err)
-                      Right t  -> True
+  where parser ast = forceTree (parseSexpr ast)
 
 tests = testGroup "S-expression tests"
           [
-            testProperty "canParseChar" canParseChar
-          , testProperty "canParseQuote" canParseQuote
-          , testProperty "canParseString" canParseString
-          , testProperty "canParseLeaf" canParseLeaf
+            testProperty "canParseLeaf" canParseLeaf
           , testProperty "canParseFlatNode" canParseFlatNode
           , testProperty "canParseRenderedTrees" canParseRenderedTrees
           , testProperty "canParseHS2ASTOutput" canParseHS2ASTOutput
