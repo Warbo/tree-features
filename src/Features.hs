@@ -46,8 +46,7 @@ extractFeatures' (Node xs) = features (map extractFeatures' xs)
 
 -- | Combine FeatureVectors
 features :: [FeatureVector] -> FeatureVector
-features []       = []
-features (x:xs)   = zipSum x (features xs)
+features = foldr zipSum []
 
 zipSum    []     ys  = ys
 zipSum    xs     []  = xs

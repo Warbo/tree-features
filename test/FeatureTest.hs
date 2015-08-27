@@ -52,7 +52,7 @@ takeUnique n xs acc = let xs' = dropWhile (`elem` acc) xs
 
 -- Properties for Trees
 
-extractFromTree n = forAll (sizedTree (1 + (abs n))) positive
+extractFromTree n = forAll (sizedTree (1 + abs n)) positive
   where positive t = all (>= 0) (extractFeatures' t)
 
 extractFromRequest n' = forAll (sizedRequest n) positive

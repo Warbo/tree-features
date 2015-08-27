@@ -12,14 +12,6 @@ import Data.Char (intToDigit)
 
 -- Helpers for Main.hs, kept separate to ease testing
 
-data Mode = Sexpr | Xml
-
-chooseMode :: IO Mode
-chooseMode = do mode <- lookupEnv "MODE"
-                return $ case mode of
-                          Just "sexpr" -> Sexpr
-                          _            -> Xml
-
 getBits :: IO Int
 getBits = do bits <- lookupEnv "BITS"
              return $ case bits of
@@ -29,25 +21,20 @@ getBits = do bits <- lookupEnv "BITS"
 defaultBits :: (Integral a) => a
 defaultBits = 31
 
-parse :: Mode -> String -> TreeOf String
-parse Xml   = (\el -> undefined) . parseXml
-parse Sexpr = parseSexpr
+parse :: String -> TreeOf String
+parse = parseSexpr
 
+mainTemplate' bits input = extractFeatures' . fmap (feature (fromIntegral bits))
+                                            . parse
+                                            $ input
 
-mainTemplate' bits input mode = extractFeatures' . fmap (feature (fromIntegral bits))
-                                                 . parse mode
-                                                 $ input
-
-mainTemplate bits input mode = numsOf bits (mainTemplate' bits input mode)
+mainTemplate bits input = numsOf bits (mainTemplate' bits input)
 
 numsOf nums fv = let padded = padTo (fromIntegral nums) fv
                  in  addCommas (map show padded)
 
 addCommas :: [String] -> String
-addCommas s = intercalate "," s
---addCommas []       = []
---addCommas [x]      = [x]
---addCommas (x:y:zs) = x:',':addCommas (y:zs)
+addCommas = intercalate ","
 
 padTo :: Int -> FeatureVector -> FeatureVector
 padTo n fv | length fv >= n = reverse (take n (reverse fv))
@@ -55,5 +42,4 @@ padTo n fv                  = padTo n (fv ++ [0])
 
 mainWithBits = do bits  <- getBits
                   input <- getContents
-                  mode  <- chooseMode
-                  putStrLn (mainTemplate bits input mode)
+                  putStrLn (mainTemplate bits input)

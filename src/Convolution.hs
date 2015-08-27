@@ -23,7 +23,7 @@ b2i (x:xs)  = b2i [x] + (2 * b2i xs)
 
 -- Prepend leading zeros
 pad n xs | length xs < n = False : pad (n-1) xs
-pad n xs | otherwise     = xs
+pad n xs                 = xs
 
 -- "Circular" list indexing
 [] !!! _ = error "Cannot index an empty list"

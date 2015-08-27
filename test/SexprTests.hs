@@ -42,6 +42,7 @@ parsedTreesEqualRendered n = forAll (sizedTreeOf n :: Gen (TreeOf String))
                         t2 = parseSexpr (treeToSexpr t)
                      in t2 == t
 
+{-# NOINLINE exampleAsts #-}
 exampleAsts = unsafePerformIO $ do files <- getDirectoryContents dir
                                    let asts = filter isAst files
                                    mapM (readFile . (dir ++)) asts

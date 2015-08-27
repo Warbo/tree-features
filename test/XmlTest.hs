@@ -1,7 +1,6 @@
 module XmlTest (tests, testData) where
 
-import           Test.Tasty (testGroup)
-import Test.Tasty.QuickCheck (testProperty)
+import Test.Tasty (testGroup)
 import Test.Tasty.QuickCheck (testProperty)
 import Test.QuickCheck
 import Text.XML.Light.Input
