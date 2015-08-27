@@ -1,6 +1,5 @@
 module Features where
 
-import Convolution
 import Data.Char
 import Data.Hash.MD5
 import Data.Maybe
