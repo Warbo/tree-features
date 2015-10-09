@@ -8,10 +8,10 @@ mkDerivation {
   src = ./.;
   isLibrary = false;
   isExecutable = true;
-  buildDepends = [
+  executableHaskellDepends = [
     atto-lisp attoparsec base bytestring MissingH parsec stringable xml
   ];
-  testDepends = [
+  testHaskellDepends = [
     atto-lisp attoparsec base bytestring directory MissingH parsec
     QuickCheck stringable tasty tasty-quickcheck xml
   ];
