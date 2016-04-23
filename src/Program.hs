@@ -24,9 +24,8 @@ defaultBits = 31
 parse :: String -> TreeOf String
 parse = parseSexpr
 
-mainTemplate' bits input = extractFeatures' . fmap (feature (fromIntegral bits))
-                                            . parse
-                                            $ input
+mainTemplate' bits = extractFeatures' . fmap (feature (fromIntegral bits))
+                                      . parse
 
 mainTemplate bits input = numsOf bits (mainTemplate' bits input)
 
