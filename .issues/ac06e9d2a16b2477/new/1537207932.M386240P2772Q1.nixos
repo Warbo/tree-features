@@ -1,0 +1,15 @@
+From: Chris Warburton
+Date: Mon, 17 Sep 2018 19:05:55 +0100
+State: new
+Subject: Use large, orthogonal vectors
+Message-Id: <ac06e9d2a16b2477-0-artemis@nixos>
+
+Our vectors are quite small, and should also have each of their elements
+initialised (pseudo)randomly. Currently we're activating one feature,
+but that's a local representation.
+
+Maybe use floats, initialised with a normal distribution as per:
+
+Cox, G., Kachergis, G., Recchia, G., & Jones, M. N. (2011).
+Towards a scalable holographic word-form representation.
+Behavior Research Methods, 43, 602-615.

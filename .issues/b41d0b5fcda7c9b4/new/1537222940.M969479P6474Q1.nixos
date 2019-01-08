@@ -1,0 +1,16 @@
+From: Chris Warburton
+Date: Mon, 17 Sep 2018 23:04:42 +0100
+State: new
+Subject: Circular convolution is commutative?
+Message-Id: <b41d0b5fcda7c9b4-0-artemis@nixos>
+
+We shouldn't be using a commutative operation. According to:
+
+Cox, G., Kachergis, G., Recchia, G., & Jones, M. N. (2011).
+Towards a scalable holographic word-form representation.
+Behavior Research Methods, 43, 602-615.
+
+They apply a "random" but invertible permutation before doing the
+circular convolution, to force it to be non-commutative.
+
+Compare their formulation to our original source.
